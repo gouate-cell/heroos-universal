@@ -1,0 +1,16 @@
+{
+  "name": "HeroPlay Universal",
+  "short_name": "HeroPlay",
+  "description": "Lecteur universel pour flux légaux M3U, M3U8, TS et Xtream.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070914",
+  "theme_color": "#070914",
+  "lang": "fr",
+  "icons": [
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}

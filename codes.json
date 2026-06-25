@@ -1,0 +1,4 @@
+{
+  "1949": {"name":"HeroPlay News Demo","url":"https://iptv-org.github.io/iptv/categories/news.m3u"},
+  "3030": {"name":"HeroPlay Xtream Demo","type":"xtream","server":"http://example.com","username":"demo","password":"demo"}
+}

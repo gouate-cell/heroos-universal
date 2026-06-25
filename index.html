@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070914">
+<title>HeroPlay Universal</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#070914;--panel:#101424;--card:#171d31;--muted:#9aa4bd;--text:#eef2ff;--line:rgba(255,255,255,.1);--a:#7c5cff;--b:#19e3c4;--danger:#ff5f7a;--ok:#35e39b}*{box-sizing:border-box}html,body{margin:0;height:100%;background:radial-gradient(900px 500px at 10% -10%,rgba(124,92,255,.35),transparent),radial-gradient(700px 500px at 110% 10%,rgba(25,227,196,.15),transparent),var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input{font:inherit}button{cursor:pointer}.app{min-height:100%;display:grid;grid-template-columns:360px 1fr}@media(max-width:850px){.app{grid-template-columns:1fr}.side{position:relative!important;height:auto!important}.player{min-height:48vh}.content{padding-bottom:90px}}.side{position:sticky;top:0;height:100vh;padding:18px;border-right:1px solid var(--line);background:rgba(7,9,20,.75);backdrop-filter:blur(18px);overflow:auto}.brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--a),var(--b));display:grid;place-items:center;font-weight:900;box-shadow:0 0 30px rgba(124,92,255,.35)}.brand h1{font-size:20px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.card{background:rgba(23,29,49,.78);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px}.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 12px}.field{margin-bottom:10px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid var(--line);background:#0b0f1d;color:var(--text);border-radius:12px;padding:12px;outline:none}input:focus{border-color:var(--a)}.row{display:flex;gap:8px}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:800;color:white;background:linear-gradient(135deg,var(--a),#5b3df5)}.btn.secondary{background:#222a43;color:var(--text)}.btn.danger{background:rgba(255,95,122,.18);color:#ffd6df}.btn.block{width:100%}.hint{font-size:12px;color:var(--muted);line-height:1.45}.content{display:flex;flex-direction:column;min-width:0}.player{background:#000;position:relative;min-height:58vh;display:grid;place-items:center;border-bottom:1px solid var(--line)}video{width:100%;height:100%;max-height:72vh;background:#000;display:block}.emptyPlayer{text-align:center;padding:30px;color:var(--muted)}.emptyPlayer b{color:var(--text)}.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:rgba(16,20,36,.75);border-bottom:1px solid var(--line)}.title{min-width:0}.title b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.title span{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tabs{display:flex;gap:8px;flex-wrap:wrap}.pill{border:1px solid var(--line);background:#11162a;color:var(--text);border-radius:999px;padding:8px 10px;font-size:12px}.pill.on{border-color:var(--b);color:#dffff9;background:rgba(25,227,196,.12)}.main{padding:16px;overflow:auto}.search{display:flex;gap:8px;margin-bottom:12px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}.ch{border:1px solid var(--line);background:rgba(23,29,49,.72);border-radius:16px;padding:12px;text-align:left;color:var(--text);min-height:84px}.ch:hover{border-color:rgba(25,227,196,.6)}.ch b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px}.ch span{display:block;color:var(--muted);font-size:11px;margin-top:8px}.status{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;background:#090d19;border:1px solid var(--line);border-radius:14px;padding:10px;max-height:170px;overflow:auto;color:#cdd6f4;font-size:11px}.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);padding:6px 8px;border-radius:999px;font-size:12px;color:var(--muted)}.dot{width:8px;height:8px;border-radius:99px;background:var(--muted)}.dot.ok{background:var(--ok)}.dot.bad{background:var(--danger)}.loader{display:none}.loading .loader{display:inline}.spinner{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:var(--b);animation:sp .7s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}.legal{font-size:11px;color:var(--muted);line-height:1.35;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="logo">H</div><div><h1>HeroPlay Universal</h1><p>Smart Kernel v18</p></div></div>
+    <div class="card">
+      <h2>Ajouter n'importe quoi</h2>
+      <div class="field"><label>Lien M3U / M3U8 / TS / MP4</label><input id="anyUrl" placeholder="https://... ou http://..."></div>
+      <div class="row"><input id="anyName" placeholder="Nom" value="Mon flux"><button class="btn" id="addAny">OK</button></div>
+      <p class="hint">Le moteur teste automatiquement direct, proxy, HLS.js, mpegts.js et fallback vidéo natif.</p>
+    </div>
+    <div class="card">
+      <h2>Xtream Code</h2>
+      <div class="field"><label>Serveur</label><input id="xServer" placeholder="http://serveur:port"></div>
+      <div class="field"><label>Utilisateur</label><input id="xUser" placeholder="username"></div>
+      <div class="field"><label>Mot de passe</label><input id="xPass" placeholder="password"></div>
+      <button class="btn block" id="addXtream"><span class="loader"><span class="spinner"></span></span> Ajouter Xtream</button>
+    </div>
+    <div class="card">
+      <h2>Code privé</h2>
+      <div class="row"><input id="code" placeholder="1949"><button class="btn secondary" id="addCode">OK</button></div>
+    </div>
+    <div class="card">
+      <h2>Diagnostic IA</h2>
+      <div class="status" id="log">Prêt. Ajoute un flux légal pour commencer.</div>
+      <button class="btn danger block" id="clear" style="margin-top:10px">Tout effacer</button>
+      <div class="legal">HeroPlay ne fournit aucun contenu. Utilise uniquement des flux que tu as le droit de regarder.</div>
+    </div>
+  </aside>
+
+  <section class="content">
+    <div class="player">
+      <video id="video" controls playsinline webkit-playsinline></video>
+      <div class="emptyPlayer" id="emptyPlayer"><b>Hero Kernel attend un flux.</b><br>Colle une URL ou ajoute un serveur Xtream.</div>
+    </div>
+    <div class="bar">
+      <div class="title"><b id="nowTitle">Aucune lecture</b><span id="nowSub">Smart Play choisira la meilleure méthode automatiquement.</span></div>
+      <div class="tabs"><span class="badge"><span class="dot" id="netDot"></span><span id="netText">Idle</span></span><button class="pill on" id="tabAll">Tous</button></div>
+    </div>
+    <main class="main">
+      <div class="search"><input id="search" placeholder="Rechercher une chaîne, groupe, ID..."><button class="btn secondary" id="refresh">Actualiser</button></div>
+      <div class="grid" id="grid"></div>
+    </main>
+  </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const video = $('video'), grid = $('grid');
+  let channels = [], currentHls = null, currentTs = null, activeGroup = 'Tous';
+  const stateKey = 'heroplay-universal-v18';
+  try { channels = JSON.parse(localStorage.getItem(stateKey) || '[]'); } catch {}
+  function save(){ try { localStorage.setItem(stateKey, JSON.stringify(channels.slice(0, 5000))); } catch {} }
+  function log(msg){ const t = new Date().toLocaleTimeString(); $('log').textContent = `[${t}] ${msg}\n` + $('log').textContent.slice(0, 5000); }
+  function setNet(kind, text){ $('netDot').className = 'dot ' + (kind === 'ok' ? 'ok' : kind === 'bad' ? 'bad' : ''); $('netText').textContent = text; }
+  function nameFromUrl(url){ try { return decodeURIComponent(new URL(url).pathname.split('/').pop() || 'Flux'); } catch { return 'Flux'; } }
+  function proxy(u){ return '/stream?url=' + encodeURIComponent(u); }
+  function candidatesForUrl(url){
+    const isM3U8 = /\.m3u8?(\?|$)/i.test(url);
+    const isTS = /\.ts(\?|$)/i.test(url);
+    const arr = [];
+    if (isTS) arr.push({kind:'ts-proxy',url:proxy(url)},{kind:'ts-direct',url});
+    else if (isM3U8) arr.push({kind:'hls-proxy',url:proxy(url)},{kind:'hls-direct',url});
+    else arr.push({kind:'native-proxy',url:proxy(url)},{kind:'native-direct',url});
+    return arr;
+  }
+  function stopEngines(){ try{ if(currentHls){ currentHls.destroy(); currentHls=null; } }catch{} try{ if(currentTs){ currentTs.destroy(); currentTs=null; } }catch{} video.pause(); video.removeAttribute('src'); video.load(); }
+  function waitForPlay(timeout=9000){
+    return new Promise((resolve,reject)=>{
+      let done=false;
+      const ok=()=>{ if(done) return; done=true; cleanup(); resolve(); };
+      const bad=()=>{ if(done) return; done=true; cleanup(); reject(new Error(video.error ? ('video error '+video.error.code) : 'video error')); };
+      const timer=setTimeout(()=>{ if(done) return; done=true; cleanup(); reject(new Error('timeout')); }, timeout);
+      function cleanup(){ clearTimeout(timer); video.removeEventListener('playing',ok); video.removeEventListener('loadeddata',ok); video.removeEventListener('error',bad); }
+      video.addEventListener('playing',ok); video.addEventListener('loadeddata',ok); video.addEventListener('error',bad);
+      const p = video.play(); if(p && p.catch) p.catch(()=>{});
+    });
+  }
+  async function tryCandidate(c){
+    stopEngines();
+    log('Test ' + c.kind + ' → ' + c.url);
+    if (/hls/i.test(c.kind)) {
+      if (video.canPlayType('application/vnd.apple.mpegurl')) { video.src = c.url; await waitForPlay(); return; }
+      if (!window.Hls || !Hls.isSupported()) throw new Error('HLS non supporté');
+      currentHls = new Hls({ lowLatencyMode:true, backBufferLength:30, maxBufferLength:20, fragLoadingTimeOut:10000, manifestLoadingTimeOut:10000 });
+      currentHls.loadSource(c.url); currentHls.attachMedia(video); await waitForPlay(); return;
+    }
+    if (/ts/i.test(c.kind)) {
+      if (window.mpegts && mpegts.getFeatureList().mseLivePlayback) {
+        currentTs = mpegts.createPlayer({ type:'mpegts', isLive:true, url:c.url }, { enableWorker:true, lazyLoad:true, seekType:'range' });
+        currentTs.attachMediaElement(video); currentTs.load(); await waitForPlay(); return;
+      }
+      video.src = c.url; await waitForPlay(); return;
+    }
+    video.src = c.url; await waitForPlay();
+  }
+  async function play(ch){
+    $('emptyPlayer').style.display='none'; $('nowTitle').textContent=ch.t; $('nowSub').textContent=(ch.g||'')+' · '+(ch.i||''); setNet('', 'Analyse');
+    const list = ch.candidates && ch.candidates.length ? ch.candidates : candidatesForUrl(ch.url);
+    for (const c of list) {
+      try { await tryCandidate(c); setNet('ok','Lecture'); $('nowSub').textContent = `${ch.g||''} · méthode ${c.kind}`; log('SUCCÈS avec ' + c.kind); return; }
+      catch(e){ log('Échec ' + c.kind + ' : ' + (e.message||e)); }
+    }
+    setNet('bad','Échec'); $('emptyPlayer').style.display='grid'; log('Aucun flux compatible trouvé pour ' + ch.t);
+    alert('Aucun flux compatible trouvé. Sur certains fournisseurs, la lecture Web/PWA peut être bloquée.');
+  }
+  function addChannel(ch){ channels.unshift(ch); save(); render(); }
+  function groups(){ return ['Tous', ...Array.from(new Set(channels.map(c=>c.g||'Autres'))).slice(0,40)]; }
+  function renderTabs(){ const box=document.querySelector('.tabs'); box.querySelectorAll('button.pill[data-group]').forEach(x=>x.remove()); groups().slice(1,8).forEach(g=>{ const b=document.createElement('button'); b.className='pill'+(activeGroup===g?' on':''); b.dataset.group=g; b.textContent=g; b.addEventListener('click',()=>{activeGroup=g; render();}); box.appendChild(b); }); $('tabAll').className='pill'+(activeGroup==='Tous'?' on':''); }
+  function render(){
+    renderTabs(); grid.innerHTML=''; const q=$('search').value.toLowerCase().trim();
+    const list=channels.filter(c=>(activeGroup==='Tous'||(c.g||'Autres')===activeGroup) && (!q || [c.t,c.g,c.i].join(' ').toLowerCase().includes(q))).slice(0,600);
+    if(!list.length){ grid.innerHTML='<div class="hint">Aucune chaîne. Ajoute un lien ou un serveur.</div>'; return; }
+    for(const ch of list){ const b=document.createElement('button'); b.className='ch'; b.innerHTML=`<b>${escapeHtml(ch.t)}</b><span>${escapeHtml(ch.g||'Autres')} · ${escapeHtml(ch.i||'')}</span>`; b.addEventListener('click',()=>play(ch)); grid.appendChild(b); }
+  }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  async function loadM3U(url, name){
+    log('Chargement M3U/direct : '+url);
+    const text = await fetch(proxy(url)).then(r=>r.text());
+    if (/^#EXTM3U/i.test(text.trim())) {
+      let meta={t:'',g:'Autres',logo:''}, added=0;
+      for(const raw of text.split(/\r?\n/)){
+        const line=raw.trim(); if(!line) continue;
+        if(/^#EXTINF:/i.test(line)){ const g=line.match(/group-title="([^"]*)"/i); meta.g=g?g[1]:'Autres'; meta.t=(line.split(',').pop()||'Chaîne').trim(); continue; }
+        if(line.startsWith('#')) continue;
+        const abs = new URL(line, url).toString(); channels.unshift({i:String(Date.now()+added),t:meta.t||nameFromUrl(abs),g:meta.g,url:proxy(abs),candidates:candidatesForUrl(abs)}); added++; meta={t:'',g:'Autres'};
+      }
+      log(added+' chaîne(s) importée(s).'); save(); render();
+    } else addChannel({i:String(Date.now()),t:name||nameFromUrl(url),g:'Direct',url:proxy(url),candidates:candidatesForUrl(url)});
+  }
+  $('addAny').addEventListener('click',()=>{ const url=$('anyUrl').value.trim(); if(!/^https?:\/\//i.test(url)) return alert('Lien invalide'); loadM3U(url,$('anyName').value.trim()).catch(e=>{log('Erreur ajout lien: '+e.message); alert(e.message);}); });
+  $('addXtream').addEventListener('click',async()=>{
+    const btn=$('addXtream'); btn.classList.add('loading'); setNet('', 'Xtream');
+    try{
+      const server=$('xServer').value.trim(), username=$('xUser').value.trim(), password=$('xPass').value.trim();
+      const api=`/.netlify/functions/xtream?server=${encodeURIComponent(server)}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+      log('Appel Xtream...'); const data=await fetch(api).then(r=>r.json());
+      if(!data.channels || !data.channels.length) throw new Error(data.error || 'Aucune chaîne');
+      channels = data.channels.concat(channels); save(); activeGroup='Tous'; render(); setNet('ok','Xtream OK'); log(`${data.channels.length} chaînes ajoutées via ${data.method}.`);
+    }catch(e){ setNet('bad','Erreur'); log('Erreur Xtream: '+(e.message||e)); alert('Erreur Xtream: '+(e.message||e)); }
+    finally{ btn.classList.remove('loading'); }
+  });
+  $('addCode').addEventListener('click',async()=>{ try{ const c=$('code').value.trim(); const data=await fetch('codes.json?'+Date.now()).then(r=>r.json()); if(!data[c]) return alert('Code introuvable'); const item=data[c]; if(item.type==='xtream'){ $('xServer').value=item.server; $('xUser').value=item.username; $('xPass').value=item.password; $('addXtream').click(); } else loadM3U(item.url,item.name); }catch(e){ alert(e.message); } });
+  $('clear').addEventListener('click',()=>{ if(confirm('Tout effacer ?')){ channels=[]; save(); stopEngines(); render(); } });
+  $('refresh').addEventListener('click',render); $('search').addEventListener('input',render); $('tabAll').addEventListener('click',()=>{activeGroup='Tous';render();});
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+  render();
+})();
+</script>
+</body>
+</html>
