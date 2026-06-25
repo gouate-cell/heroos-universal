@@ -1,100 +1,112 @@
-
 function cleanServer(s) {
   s = String(s || '').trim().replace(/\/+$/, '');
   if (s && !/^https?:\/\//i.test(s)) s = 'http://' + s;
   return s;
 }
-function uniq(arr) { return [...new Set(arr.filter(Boolean))]; }
-function serverVariants(server) {
+
+function variants(server) {
   const s = cleanServer(server);
-  if (!s) return [];
-  const out = [s];
+  const out = [];
+  if (s) out.push(s);
   if (s.startsWith('http://')) out.push('https://' + s.slice(7));
   if (s.startsWith('https://')) out.push('http://' + s.slice(8));
-  return uniq(out);
+  return [...new Set(out)];
 }
-function isFakeTitle(t) {
-  const s = String(t || '').trim();
-  if (!s) return true;
-  if (/^#+\s*[^#]*\s*#+$/.test(s)) return true;
-  if (/^[-_=*\s]+$/.test(s)) return true;
-  return false;
-}
-function hlsUrl(server, user, pass, id) { return `${server}/live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${id}.m3u8`; }
-function tsUrl(server, user, pass, id) { return `${server}/live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${id}.ts`; }
-function proxyUrl(url) { return `/stream?url=${encodeURIComponent(url)}`; }
-function buildChannel(server, user, pass, id, title, group, logo) {
-  const m3u8 = hlsUrl(server, user, pass, id);
-  const ts = tsUrl(server, user, pass, id);
-  return {
-    i: String(id),
-    t: String(title || `Chaîne ${id}`).trim(),
-    g: String(group || 'Autres'),
-    logo: logo || '',
-    url: proxyUrl(ts),
-    hls_url: proxyUrl(m3u8),
-    ts_url: proxyUrl(ts),
-    direct_hls_url: m3u8,
-    direct_ts_url: ts,
-    candidates: [
-      { kind: 'ts-proxy', url: proxyUrl(ts) },
-      { kind: 'hls-proxy', url: proxyUrl(m3u8) },
-      { kind: 'hls-direct', url: m3u8 },
-      { kind: 'ts-direct', url: ts }
-    ]
-  };
-}
+
 async function getText(url) {
-  const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 HeroPlay/18', 'Accept': '*/*', 'Referer': new URL(url).origin + '/' },
+  const r = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 HeroOS/1.0',
+      'Accept': '*/*'
+    },
     redirect: 'follow'
   });
-  const text = await res.text();
-  if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + text.slice(0, 160));
-  return text;
+
+  const t = await r.text();
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${t.slice(0, 140)}`);
+  return t;
 }
-async function getJson(url) {
-  const text = await getText(url);
-  try { return JSON.parse(text); } catch { throw new Error('JSON invalide: ' + text.slice(0, 160)); }
+
+function isFakeName(name) {
+  const n = String(name || '').trim();
+  return !n || /^#+/.test(n) || /NO\s+(MATCH|EVENT)$/i.test(n);
 }
-async function loadApi(server, user, pass) {
-  const url = `${server}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=get_live_streams`;
-  const arr = await getJson(url);
-  if (!Array.isArray(arr) || !arr.length) throw new Error('player_api vide');
-  return arr.map(x => {
-    const id = x.stream_id || x.id;
-    const title = x.name || x.title || `Chaîne ${id}`;
-    if (!id || isFakeTitle(title)) return null;
-    return buildChannel(server, user, pass, id, title, x.category_name || x.category_id || 'Autres', x.stream_icon || x.logo || '');
-  }).filter(Boolean);
+
+function safeChannels(channels, limit = 500) {
+  return (channels || [])
+    .filter(c => c && c.i && c.t && !isFakeName(c.t))
+    .slice(0, limit);
 }
-function parseM3U(text, server, user, pass) {
+
+function m3uParse(text, server, user, pass) {
   const body = String(text || '').trim();
-  if (!/^#EXTM3U/i.test(body)) throw new Error('Réponse non M3U: ' + body.slice(0, 100));
-  const out = [];
-  let meta = { title: '', group: '', logo: '' };
+  if (!/^#EXTM3U/i.test(body)) throw new Error('Réponse non M3U');
+
+  const channels = [];
+  let title = '';
+  let group = '';
+  let logo = '';
+
   for (const raw of body.split(/\r?\n/)) {
     const line = raw.trim();
     if (!line) continue;
-    if (/^#EXTINF:/i.test(line)) {
-      const group = line.match(/group-title="([^"]*)"/i);
-      const logo = line.match(/tvg-logo="([^"]*)"/i);
-      meta.group = group ? group[1] : 'Autres';
-      meta.logo = logo ? logo[1] : '';
-      meta.title = (line.split(',').pop() || '').trim();
+
+    if (line.startsWith('#EXTINF')) {
+      title = (line.split(',').pop() || '').trim();
+      group = (line.match(/group-title="([^"]*)"/i) || [, 'Autres'])[1] || 'Autres';
+      logo = (line.match(/tvg-logo="([^"]*)"/i) || [, ''])[1] || '';
       continue;
     }
+
     if (line.startsWith('#')) continue;
-    const m = line.match(/\/live\/[^/]+\/[^/]+\/(\d+)\.(ts|m3u8)(\?|$)/i);
-    if (m && !isFakeTitle(meta.title)) out.push(buildChannel(server, user, pass, m[1], meta.title, meta.group, meta.logo));
-    meta = { title: '', group: '', logo: '' };
+
+    try {
+      const url = new URL(line, server + '/').toString();
+      const m = url.match(/\/live\/[^/]+\/[^/]+\/(\d+)\.(m3u8|ts)(\?|$)/i);
+      const id = m ? m[1] : String(channels.length + 1);
+
+      if (!isFakeName(title)) {
+        channels.push(
+          makeChannel(
+            server,
+            user,
+            pass,
+            id,
+            title || `Chaîne ${id}`,
+            group,
+            logo,
+            url
+          )
+        );
+      }
+    } catch {}
+
+    title = '';
+    group = '';
+    logo = '';
   }
-  return out;
+
+  return channels;
 }
-async function loadGetPhp(server, user, pass, output) {
-  const url = `${server}/get.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&type=m3u_plus&output=${output}`;
-  return parseM3U(await getText(url), server, user, pass);
+
+function makeChannel(server, user, pass, id, title, group, logo, directUrl) {
+  const base = cleanServer(server);
+  const hls = `${base}/live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${id}.m3u8`;
+  const ts = `${base}/live/${encodeURIComponent(user)}/${encodeURIComponent(pass)}/${id}.ts`;
+  const url = directUrl || ts;
+
+  return {
+    i: String(id),
+    t: title,
+    g: group || 'Autres',
+    logo: logo || '',
+    url,
+    hls_url: hls,
+    ts_url: ts,
+    candidates: [ts, hls, url].filter((v, i, a) => v && a.indexOf(v) === i)
+  };
 }
+
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -103,26 +115,103 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store'
   };
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers, body: '' };
+  }
+
   const q = event.queryStringParameters || {};
   const user = String(q.username || '').trim();
   const pass = String(q.password || '').trim();
-  const variants = serverVariants(q.server);
-  if (!variants.length || !user || !pass) return { statusCode: 400, headers, body: JSON.stringify({ error: 'server, username et password requis', channels: [] }) };
+  const serverList = variants(q.server);
+
+  if (!serverList.length || !user || !pass) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({
+        error: 'server, username et password requis',
+        channels: []
+      })
+    };
+  }
+
   const errors = [];
-  for (const server of variants) {
-    const attempts = [
-      ['api', () => loadApi(server, user, pass)],
-      ['get_m3u8', () => loadGetPhp(server, user, pass, 'm3u8')],
-      ['get_ts', () => loadGetPhp(server, user, pass, 'ts')]
-    ];
-    for (const [method, fn] of attempts) {
+
+  for (const server of serverList) {
+    try {
+      const url = `${server}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&action=get_live_streams`;
+      const arr = JSON.parse(await getText(url));
+
+      if (!Array.isArray(arr)) throw new Error('API non tableau');
+
+      const allChannels = arr.map(x =>
+        makeChannel(
+          server,
+          user,
+          pass,
+          x.stream_id || x.id,
+          x.name || `Chaîne ${x.stream_id || x.id}`,
+          x.category_name || x.category_id || 'Autres',
+          x.stream_icon || ''
+        )
+      );
+
+      const channels = safeChannels(allChannels, 500);
+
+      if (channels.length) {
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            server_used: server,
+            method: 'api',
+            total_available: allChannels.length,
+            count: channels.length,
+            limited: allChannels.length > channels.length,
+            channels
+          })
+        };
+      }
+
+      throw new Error('API vide');
+    } catch (e) {
+      errors.push(`${server} api: ${e.message}`);
+    }
+
+    for (const out of ['ts', 'm3u8']) {
       try {
-        const channels = await fn();
-        if (channels.length) return { statusCode: 200, headers, body: JSON.stringify({ server_used: server, method, total: channels.length, channels }) };
-        errors.push(`${server} ${method}: 0 chaîne`);
-      } catch (e) { errors.push(`${server} ${method}: ${e.message || String(e)}`); }
+        const url = `${server}/get.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}&type=m3u_plus&output=${out}`;
+        const allChannels = m3uParse(await getText(url), server, user, pass);
+        const channels = safeChannels(allChannels, 500);
+
+        if (channels.length) {
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+              server_used: server,
+              method: 'm3u_' + out,
+              total_available: allChannels.length,
+              count: channels.length,
+              limited: allChannels.length > channels.length,
+              channels
+            })
+          };
+        }
+      } catch (e) {
+        errors.push(`${server} m3u ${out}: ${e.message}`);
+      }
     }
   }
-  return { statusCode: 502, headers, body: JSON.stringify({ error: 'Aucune chaîne trouvée', errors, channels: [] }) };
+
+  return {
+    statusCode: 502,
+    headers,
+    body: JSON.stringify({
+      error: 'Impossible de charger le serveur',
+      errors,
+      channels: []
+    })
+  };
 };
